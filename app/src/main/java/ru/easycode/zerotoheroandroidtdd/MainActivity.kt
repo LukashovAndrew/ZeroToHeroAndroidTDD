@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        val removedTextView = linearLayout.childCount == 1 //textView.isInLayout
+        val removedTextView = textView.isInLayout //linearLayout.childCount == 1 //
         val enabledButton = button.isEnabled
         outState.putBoolean(KEY_textView, removedTextView)
         outState.putBoolean(KEY_button, enabledButton)
@@ -39,14 +39,14 @@ class MainActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         val removedTextView = savedInstanceState.getBoolean(KEY_textView)
         val enabledButton = savedInstanceState.getBoolean(KEY_button)
-        if(removedTextView)
+        if(!removedTextView)
             linearLayout.removeView(textView)
         if(!enabledButton)
             button.isEnabled = false
     }
 
 companion object{
-    private const val KEY_textView = "key"
-    private const val KEY_button = "key"
+    private const val KEY_textView = "key1"
+    private const val KEY_button = "key2"
 }
 }
