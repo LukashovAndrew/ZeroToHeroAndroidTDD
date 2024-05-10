@@ -5,11 +5,13 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-
+import java.io.Serializable
 
 
 class MainActivity : AppCompatActivity() {
 
+    //Определяем типа объект-интерфейс с типом Initial
+    private  var state: State = State.Initial
     private lateinit var linearLayout: LinearLayout
     private lateinit var textView: TextView
     private lateinit var button: Button
@@ -22,31 +24,40 @@ class MainActivity : AppCompatActivity() {
         button = findViewById<Button>(R.id.removeButton)
 
         button.setOnClickListener {
-            linearLayout.removeView(textView)
-            button.isEnabled = false
+            state = State.Removed   //Меняем наш state на Removed
+            state.apply(linearLayout,textView, button)  //Выполняем функцию которая удалит textView
+
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        val removedTextView = textView.isInLayout //linearLayout.childCount == 1 //
-        val enabledButton = button.isEnabled
-        outState.putBoolean(KEY_textView, removedTextView)
-        outState.putBoolean(KEY_button, enabledButton)
+        outState.putSerializable(KEY_textView, state)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val removedTextView = savedInstanceState.getBoolean(KEY_textView)
-        val enabledButton = savedInstanceState.getBoolean(KEY_button)
-        if(!removedTextView)
-            linearLayout.removeView(textView)
-        if(!enabledButton)
-            button.isEnabled = false
+        state = savedInstanceState.getSerializable(KEY_textView, State::class.java) as State
+        state.apply(linearLayout, textView, button)
     }
 
-companion object{
-    private const val KEY_textView = "key1"
-    private const val KEY_button = "key2"
-}
+    companion object{
+        private const val KEY_textView = "key1"
+        private const val KEY_button = "key2"
+    }
+
+    interface State: Serializable {
+
+        fun apply (linearLayout: LinearLayout, textView: TextView, button: Button)
+        object Initial : State {
+            override fun apply(linearLayout: LinearLayout, textView: TextView, button: Button) = Unit
+        }
+
+        object Removed : State {
+            override fun apply(linearLayout: LinearLayout, textView: TextView, button: Button) {
+                linearLayout.removeView(textView)
+                button.isEnabled = false
+            }
+        }
+    }
 }
